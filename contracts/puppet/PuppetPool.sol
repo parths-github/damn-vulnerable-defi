@@ -43,6 +43,9 @@ contract PuppetPool is ReentrancyGuard {
     }
 
     function calculateDepositRequired(uint256 amount) public view returns (uint256) {
+        /**
+        // this is wrong and will be 0 due to integer division as soon as the pool's token balance > ETH balance
+         */
         return amount * _computeOraclePrice() * 2 / 10 ** 18;
     }
 
